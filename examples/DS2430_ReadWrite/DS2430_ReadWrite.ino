@@ -1,11 +1,11 @@
 /*
 
-DS2431 example that dumps the whole memory and prints it to Serial.
+DS2430 example that dumps the whole memory and prints it to Serial.
 Then a write operation is done and the memory is read again.
 
 MIT License
 
-Copyright (c) 2018 Nicolò Veronese
+Copyright (c) 2017 Tom Magnier
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,27 +26,44 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-#include <DS2431.h>
+#include <DS2430.h>
 #include <OneWire.h>
 
 const int ONE_WIRE_PIN = 9; // One Wire pin, change according to your needs. A 4.7k pull up resistor is needed.
 
 OneWire oneWire(ONE_WIRE_PIN);
-DS2431 eeprom(oneWire);
+DS2430 eeprom(oneWire);
 
 void setup()
 {
   Serial.begin(115200);
   while (!Serial); // wait for Serial to come up on USB boards
-  
-  if(!oneWire.reset())
+
+  // Search the 1-Wire bus for a connected device.
+  byte serialNb[8];
+  oneWire.target_search(DS2430::ONE_WIRE_FAMILY_CODE);
+  if (!oneWire.search(serialNb))
   {
-    Serial.println("No DS2431 found on the 1-Wire bus.");
+    Serial.println("No DS2430 found on the 1-Wire bus.");
     return;
   }
 
+  // Check serial number CRC
+  if (oneWire.crc8(serialNb, 7) != serialNb[7])
+  {
+    Serial.println("A DS2430 was found but the serial number CRC is invalid.");
+    return;
+  }
+
+  Serial.print("DS2430 found with serial number : ");
+  printBuffer(serialNb, 8);
+  Serial.println("");
+
+  // Initialize DS2430 object
+  eeprom.begin(serialNb);
+
   // Read all memory content
-  byte data[128];
+  byte data[32];
   eeprom.read(0, data, sizeof(data));
 
   Serial.println("Memory contents : ");

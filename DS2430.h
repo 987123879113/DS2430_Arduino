@@ -23,49 +23,48 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-#ifndef _DS2431_H
-#define _DS2431_H
+#ifndef _DS2430_H
+#define _DS2430_H
 
 #include <OneWire.h>
 
-class DS2431 {
+class DS2430 {
 public:
   const static uint8_t ONE_WIRE_MAC_SIZE = 8;
 
-  const static uint8_t ONE_WIRE_FAMILY_CODE = 0x2D;
+  const static uint8_t ONE_WIRE_FAMILY_CODE = 0x14;
 
-  const static uint8_t DS2431_EEPROM_SIZE = 128;
-  const static uint8_t DS2431_ROW_SIZE = 8;
+  const static uint8_t DS2430_EEPROM_SIZE = 32;
+  const static uint8_t DS2430_ROW_SIZE = 32;
 
-  DS2431(OneWire &ow); // OneWire class
+  DS2430(OneWire &ow); // OneWire class
 
   void begin(uint8_t serialNumber[ONE_WIRE_MAC_SIZE]); // family code, 48bit serial number and CRC as returned by OneWire search function
 
   /* Single byte read
   */
-  uint8_t read(uint16_t address);
+  uint8_t read(uint8_t address);
 
   /* Multiple byte read.
   */
-  void read(uint16_t address, uint8_t *buf, uint16_t len);
+  void read(uint8_t address, uint8_t *buf, uint16_t len);
 
   /* Multiple byte write.
     Please note : address must be a multiple of 8. Write up to 8 bytes
     Return true if operation was successful.
     The OneWire bus should be de-powered after calling this function.
   */
-  bool write(uint16_t address, const uint8_t *buf, uint16_t count, bool verify = false);
+  bool write(uint8_t address, const uint8_t *buf, uint16_t count, bool verify = false);
 
 private:
-  const static uint8_t DS2431_PF_MASK = 0x07;
-  const static uint8_t DS2431_WRITE_MASK = 0xAA;
+  const static uint8_t DS2430_PF_MASK = 0x07;
+  const static uint8_t DS2430_WRITE_MASK = 0xAA;
 
-  const static uint8_t DS2431_CMD_SIZE = 3;
-  const static uint8_t DS2431_CRC_SIZE = 2;
+  const static uint8_t DS2430_CMD_SIZE = 2;
 
-  const static uint8_t DS2431_READ_RETRY = 2;
+  const static uint8_t DS2430_READ_RETRY = 2;
 
-  const static uint16_t DS2431_BUFFER_SIZE = DS2431_ROW_SIZE + DS2431_CMD_SIZE + DS2431_CRC_SIZE;
+  const static uint16_t DS2430_BUFFER_SIZE = DS2430_ROW_SIZE + DS2430_CMD_SIZE;
 
   OneWire &_ow;
   uint8_t _serialNumber[ONE_WIRE_MAC_SIZE];
@@ -78,7 +77,7 @@ private:
     READ_MEMORY = 0xF0
   };
 
-  bool _write(uint16_t address, const uint8_t *buf, uint16_t count, bool verify);
+  bool _write(uint8_t address, const uint8_t *buf, uint16_t count, bool verify);
 
   inline void _startTransmission()
   {
@@ -90,4 +89,4 @@ private:
   }
 };
 
-#endif // _DS2431_H
+#endif // _DS2430_H
